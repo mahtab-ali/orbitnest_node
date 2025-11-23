@@ -1,0 +1,38 @@
+{
+  "name": "@orbitnest/node",
+  "version": "0.1.0",
+  "description": "OrbitNest Node.js SDK for database operations, edge functions, and authentication",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts --clean",
+    "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "orbitnest",
+    "database",
+    "edge-functions",
+    "auth",
+    "sdk"
+  ],
+  "author": "OrbitNest",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.3.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/orbitnest/node-sdk"
+  }
+}
