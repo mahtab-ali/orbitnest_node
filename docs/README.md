@@ -121,3 +121,48 @@ console.log(data.rows);
 - **service_role key**: Full permissions including admin access and RLS bypass
 
 Use `service_role` only in server-side code. Never expose it client-side.
+
+## Logging
+
+```typescript
+// Get logs
+const { data: logs } = await client.logs.getLogs({
+  level: 'error',
+  limit: 100
+});
+
+// Database logs
+const { data: dbLogs } = await client.logs.getDatabaseLogs();
+
+// Auth logs
+const { data: authLogs } = await client.logs.getAuthLogs();
+
+// Edge function logs
+const { data: funcLogs } = await client.logs.getEdgeFunctionLogs('my-function');
+```
+
+## Environment Variables
+
+```typescript
+// List all
+const { data: vars } = await client.env.list();
+
+// Set variable
+await client.env.set('API_URL', 'https://api.example.com');
+
+// Bulk create
+await client.env.bulkCreate([
+  { name: 'VAR_1', value: 'value1' },
+  { name: 'VAR_2', value: 'value2', isSecret: true }
+]);
+
+// Delete
+await client.env.delete('OLD_VAR');
+```
+
+## Documentation
+
+- [API Guide](00_api_guide.md) - API endpoint reference
+- [Implementation Guide](01_package_implementation.md) - Architecture details
+- [Package Guide](002_package_guide.md) - Full user guide
+- [Migration Plan](migration_plan.md) - Supabase migration

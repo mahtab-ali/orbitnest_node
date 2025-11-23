@@ -2,37 +2,24 @@ import { HttpClient } from './lib/client';
 import { DatabaseClient } from './lib/database';
 import { FunctionsClient } from './lib/functions';
 import { AuthClient } from './lib/auth';
+import { LoggingClient } from './lib/logging';
+import { EnvironmentClient } from './lib/environment';
 import type { OrbitNestConfig } from './types';
 
 export * from './types';
+export * from './lib/logging';
+export * from './lib/environment';
 
 export interface OrbitNestClient {
   db: DatabaseClient;
   functions: FunctionsClient;
   auth: AuthClient;
+  logs: LoggingClient;
+  env: EnvironmentClient;
 }
 
 /**
  * Create an OrbitNest client instance
- *
- * @example
- * ```typescript
- * import { createClient } from '@orbitnest/node';
- *
- * const client = createClient({
- *   projectSlug: 'my-project',
- *   apiKey: 'your-api-key'
- * });
- *
- * // Database operations
- * const { data, error } = await client.db.query('SELECT * FROM users');
- *
- * // Edge functions
- * await client.functions.invoke('my-function', { body: { key: 'value' } });
- *
- * // Auth
- * await client.auth.signUp({ email: 'user@example.com', password: 'password' });
- * ```
  */
 export function createClient(config: OrbitNestConfig): OrbitNestClient {
   if (!config.projectSlug) {
@@ -48,7 +35,9 @@ export function createClient(config: OrbitNestConfig): OrbitNestClient {
     db: new DatabaseClient(httpClient),
     functions: new FunctionsClient(httpClient),
     auth: new AuthClient(httpClient),
+    logs: new LoggingClient(httpClient),
+    env: new EnvironmentClient(httpClient),
   };
 }
 
-export { HttpClient, DatabaseClient, FunctionsClient, AuthClient };
+export { HttpClient, DatabaseClient, FunctionsClient, AuthClient, LoggingClient, EnvironmentClient };
