@@ -16,7 +16,7 @@ export class AuthClient {
   constructor(private client: HttpClient) {}
 
   private get basePath(): string {
-    return `/api/project/${this.client.getProjectSlug()}/auth`;
+    return `/api/projects/${this.client.getProjectSlug()}/auth`;
   }
 
   /**
@@ -118,7 +118,7 @@ export class AuthClient {
    * Send password recovery email
    */
   async resetPasswordForEmail(options: PasswordRecoveryOptions): Promise<ApiResult<{ success: boolean }>> {
-    return this.client.request<{ success: boolean }>(`${this.basePath}/recover`, {
+    return this.client.request<{ success: boolean }>(`${this.basePath}/recover-password`, {
       method: 'POST',
       body: { email: options.email },
     });
