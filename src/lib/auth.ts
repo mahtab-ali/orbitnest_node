@@ -34,15 +34,33 @@ export class AuthClient {
   }
 
   /**
-   * Sign up with email and password
+   * Sign up with email and password - Step 1: Request OTP
+   * This sends an OTP to the user's email for verification
    */
-  async signUp(credentials: SignUpCredentials): Promise<ApiResult<AuthSession>> {
-    const result = await this.client.request<AuthSession>(`${this.basePath}/signup`, {
+  async signUp(credentials: SignUpCredentials): Promise<ApiResult<{ success: boolean; message: string; email: string; expires_in: number }>> {
+    const result = await this.client.request<{ success: boolean; message: string; email: string; expires_in: number }>(`${this.basePath}/signup`, {
       method: 'POST',
       body: {
         email: credentials.email,
         password: credentials.password,
         user_metadata: credentials.metadata,
+      },
+    });
+
+    // Note: No session is returned in step 1, only OTP confirmation
+    return result;
+  }
+
+  /**
+   * Verify signup with OTP - Step 2: Complete registration
+   * This verifies the OTP and creates the user account
+   */
+  async verifySignUp(options: { email: string; code: string }): Promise<ApiResult<AuthSession>> {
+    const result = await this.client.request<AuthSession>(`${this.basePath}/verify-signup`, {
+      method: 'POST',
+      body: {
+        email: options.email,
+        code: options.code,
       },
     });
 
