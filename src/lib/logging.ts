@@ -23,7 +23,7 @@ export class LoggingClient {
   constructor(private client: HttpClient) {}
 
   private get basePath(): string {
-    return `/api/project/${this.client.getProjectSlug()}/logs`;
+    return `/api/projects/${this.client.getProjectSlug()}/logs`;
   }
 
   /**

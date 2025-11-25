@@ -14,7 +14,7 @@ export class EnvironmentClient {
   constructor(private client: HttpClient) {}
 
   private get basePath(): string {
-    return `/api/project/${this.client.getProjectSlug()}/environment-variables`;
+    return `/api/projects/${this.client.getProjectSlug()}/environment-variables`;
   }
 
   /**

@@ -243,9 +243,23 @@ declare class AuthClient {
      */
     getUser(): AuthUser | null;
     /**
-     * Sign up with email and password
+     * Sign up with email and password - Step 1: Request OTP
+     * This sends an OTP to the user's email for verification
      */
-    signUp(credentials: SignUpCredentials): Promise<ApiResult<AuthSession>>;
+    signUp(credentials: SignUpCredentials): Promise<ApiResult<{
+        success: boolean;
+        message: string;
+        email: string;
+        expires_in: number;
+    }>>;
+    /**
+     * Verify signup with OTP - Step 2: Complete registration
+     * This verifies the OTP and creates the user account
+     */
+    verifySignUp(options: {
+        email: string;
+        code: string;
+    }): Promise<ApiResult<AuthSession>>;
     /**
      * Sign in with email and password
      */

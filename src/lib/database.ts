@@ -11,14 +11,14 @@ export class DatabaseClient {
   constructor(private client: HttpClient) {}
 
   private get basePath(): string {
-    return `/api/project/${this.client.getProjectSlug()}`;
+    return `/api/projects/${this.client.getProjectSlug()}/database`;
   }
 
   /**
    * Execute a raw SQL query
    */
   async query<T = Record<string, unknown>>(sql: string, params?: unknown[]): Promise<ApiResult<QueryResult<T>>> {
-    return this.client.request<QueryResult<T>>(`${this.basePath}/database/sql`, {
+    return this.client.request<QueryResult<T>>(`${this.basePath}/sql`, {
       method: 'POST',
       body: { query: sql, params },
     });
@@ -28,14 +28,14 @@ export class DatabaseClient {
    * Get all tables in the database
    */
   async listTables(): Promise<ApiResult<string[]>> {
-    return this.client.request<string[]>(`${this.basePath}/database/tables/list`);
+    return this.client.request<string[]>(`${this.basePath}/tables/list`);
   }
 
   /**
    * Get table metadata including columns
    */
   async getTableMetadata(tableName: string): Promise<ApiResult<TableMetadata>> {
-    return this.client.request<TableMetadata>(`${this.basePath}/database/tables?table=${tableName}`);
+    return this.client.request<TableMetadata>(`${this.basePath}/tables?table=${tableName}`);
   }
 
   /**
@@ -53,7 +53,7 @@ export class DatabaseClient {
 
     const query = params.toString() ? `?${params.toString()}` : '';
     return this.client.request<{ rows: T[]; total: number }>(
-      `${this.basePath}/database/tables/${tableName}/data${query}`
+      `${this.basePath}/tables/${tableName}/data${query}`
     );
   }
 
@@ -64,7 +64,7 @@ export class DatabaseClient {
     tableName: string,
     data: Record<string, unknown>
   ): Promise<ApiResult<T>> {
-    return this.client.request<T>(`${this.basePath}/database/tables/${tableName}/rows`, {
+    return this.client.request<T>(`${this.basePath}/tables/${tableName}/rows`, {
       method: 'POST',
       body: data,
     });
@@ -78,7 +78,7 @@ export class DatabaseClient {
     rowId: string | number,
     data: Record<string, unknown>
   ): Promise<ApiResult<T>> {
-    return this.client.request<T>(`${this.basePath}/database/tables/${tableName}/rows/${rowId}`, {
+    return this.client.request<T>(`${this.basePath}/tables/${tableName}/rows/${rowId}`, {
       method: 'PUT',
       body: data,
     });
@@ -89,7 +89,7 @@ export class DatabaseClient {
    */
   async delete(tableName: string, rowId: string | number): Promise<ApiResult<{ success: boolean }>> {
     return this.client.request<{ success: boolean }>(
-      `${this.basePath}/database/tables/${tableName}/rows/${rowId}`,
+      `${this.basePath}/tables/${tableName}/rows/${rowId}`,
       { method: 'DELETE' }
     );
   }
@@ -101,7 +101,7 @@ export class DatabaseClient {
     tableName: string,
     rows: Record<string, unknown>[]
   ): Promise<ApiResult<T[]>> {
-    return this.client.request<T[]>(`${this.basePath}/database/tables/${tableName}/bulk-insert`, {
+    return this.client.request<T[]>(`${this.basePath}/tables/${tableName}/bulk-insert`, {
       method: 'POST',
       body: { rows },
     });
@@ -114,7 +114,7 @@ export class DatabaseClient {
     tableName: string,
     updates: Array<{ id: string | number; data: Record<string, unknown> }>
   ): Promise<ApiResult<T[]>> {
-    return this.client.request<T[]>(`${this.basePath}/database/tables/${tableName}/bulk-update`, {
+    return this.client.request<T[]>(`${this.basePath}/tables/${tableName}/bulk-update`, {
       method: 'PUT',
       body: { updates },
     });
@@ -128,7 +128,7 @@ export class DatabaseClient {
     ids: Array<string | number>
   ): Promise<ApiResult<{ deleted: number }>> {
     return this.client.request<{ deleted: number }>(
-      `${this.basePath}/database/tables/${tableName}/bulk-delete`,
+      `${this.basePath}/tables/${tableName}/bulk-delete`,
       {
         method: 'DELETE',
         body: { ids },
@@ -141,7 +141,7 @@ export class DatabaseClient {
    */
   async enableRls(tableName: string): Promise<ApiResult<{ success: boolean }>> {
     return this.client.request<{ success: boolean }>(
-      `${this.basePath}/database/tables/${tableName}/rls/enable`,
+      `${this.basePath}/tables/${tableName}/rls/enable`,
       { method: 'POST' }
     );
   }
@@ -151,7 +151,7 @@ export class DatabaseClient {
    */
   async disableRls(tableName: string): Promise<ApiResult<{ success: boolean }>> {
     return this.client.request<{ success: boolean }>(
-      `${this.basePath}/database/tables/${tableName}/rls/disable`,
+      `${this.basePath}/tables/${tableName}/rls/disable`,
       { method: 'POST' }
     );
   }
@@ -161,7 +161,7 @@ export class DatabaseClient {
    */
   async createPolicy(tableName: string, policy: RlsPolicy): Promise<ApiResult<{ success: boolean }>> {
     return this.client.request<{ success: boolean }>(
-      `${this.basePath}/database/tables/${tableName}/policies`,
+      `${this.basePath}/tables/${tableName}/policies`,
       {
         method: 'POST',
         body: policy,
@@ -173,7 +173,7 @@ export class DatabaseClient {
    * List RLS policies for a table
    */
   async listPolicies(tableName: string): Promise<ApiResult<RlsPolicy[]>> {
-    return this.client.request<RlsPolicy[]>(`${this.basePath}/database/tables/${tableName}/policies`);
+    return this.client.request<RlsPolicy[]>(`${this.basePath}/tables/${tableName}/policies`);
   }
 
   /**
@@ -181,7 +181,7 @@ export class DatabaseClient {
    */
   async deletePolicy(tableName: string, policyName: string): Promise<ApiResult<{ success: boolean }>> {
     return this.client.request<{ success: boolean }>(
-      `${this.basePath}/database/tables/${tableName}/policies/${policyName}`,
+      `${this.basePath}/tables/${tableName}/policies/${policyName}`,
       { method: 'DELETE' }
     );
   }

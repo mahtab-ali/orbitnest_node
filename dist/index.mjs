@@ -62,13 +62,13 @@ var DatabaseClient = class {
     this.client = client;
   }
   get basePath() {
-    return `/api/project/${this.client.getProjectSlug()}`;
+    return `/api/projects/${this.client.getProjectSlug()}/database`;
   }
   /**
    * Execute a raw SQL query
    */
   async query(sql, params) {
-    return this.client.request(`${this.basePath}/database/sql`, {
+    return this.client.request(`${this.basePath}/sql`, {
       method: "POST",
       body: { query: sql, params }
     });
@@ -77,13 +77,13 @@ var DatabaseClient = class {
    * Get all tables in the database
    */
   async listTables() {
-    return this.client.request(`${this.basePath}/database/tables/list`);
+    return this.client.request(`${this.basePath}/tables/list`);
   }
   /**
    * Get table metadata including columns
    */
   async getTableMetadata(tableName) {
-    return this.client.request(`${this.basePath}/database/tables?table=${tableName}`);
+    return this.client.request(`${this.basePath}/tables?table=${tableName}`);
   }
   /**
    * Get table data with pagination
@@ -96,14 +96,14 @@ var DatabaseClient = class {
     if (options.sortOrder) params.set("sortOrder", options.sortOrder);
     const query = params.toString() ? `?${params.toString()}` : "";
     return this.client.request(
-      `${this.basePath}/database/tables/${tableName}/data${query}`
+      `${this.basePath}/tables/${tableName}/data${query}`
     );
   }
   /**
    * Insert a row into a table
    */
   async insert(tableName, data) {
-    return this.client.request(`${this.basePath}/database/tables/${tableName}/rows`, {
+    return this.client.request(`${this.basePath}/tables/${tableName}/rows`, {
       method: "POST",
       body: data
     });
@@ -112,7 +112,7 @@ var DatabaseClient = class {
    * Update a row by ID
    */
   async update(tableName, rowId, data) {
-    return this.client.request(`${this.basePath}/database/tables/${tableName}/rows/${rowId}`, {
+    return this.client.request(`${this.basePath}/tables/${tableName}/rows/${rowId}`, {
       method: "PUT",
       body: data
     });
@@ -122,7 +122,7 @@ var DatabaseClient = class {
    */
   async delete(tableName, rowId) {
     return this.client.request(
-      `${this.basePath}/database/tables/${tableName}/rows/${rowId}`,
+      `${this.basePath}/tables/${tableName}/rows/${rowId}`,
       { method: "DELETE" }
     );
   }
@@ -130,7 +130,7 @@ var DatabaseClient = class {
    * Bulk insert rows
    */
   async bulkInsert(tableName, rows) {
-    return this.client.request(`${this.basePath}/database/tables/${tableName}/bulk-insert`, {
+    return this.client.request(`${this.basePath}/tables/${tableName}/bulk-insert`, {
       method: "POST",
       body: { rows }
     });
@@ -139,7 +139,7 @@ var DatabaseClient = class {
    * Bulk update rows
    */
   async bulkUpdate(tableName, updates) {
-    return this.client.request(`${this.basePath}/database/tables/${tableName}/bulk-update`, {
+    return this.client.request(`${this.basePath}/tables/${tableName}/bulk-update`, {
       method: "PUT",
       body: { updates }
     });
@@ -149,7 +149,7 @@ var DatabaseClient = class {
    */
   async bulkDelete(tableName, ids) {
     return this.client.request(
-      `${this.basePath}/database/tables/${tableName}/bulk-delete`,
+      `${this.basePath}/tables/${tableName}/bulk-delete`,
       {
         method: "DELETE",
         body: { ids }
@@ -161,7 +161,7 @@ var DatabaseClient = class {
    */
   async enableRls(tableName) {
     return this.client.request(
-      `${this.basePath}/database/tables/${tableName}/rls/enable`,
+      `${this.basePath}/tables/${tableName}/rls/enable`,
       { method: "POST" }
     );
   }
@@ -170,7 +170,7 @@ var DatabaseClient = class {
    */
   async disableRls(tableName) {
     return this.client.request(
-      `${this.basePath}/database/tables/${tableName}/rls/disable`,
+      `${this.basePath}/tables/${tableName}/rls/disable`,
       { method: "POST" }
     );
   }
@@ -179,7 +179,7 @@ var DatabaseClient = class {
    */
   async createPolicy(tableName, policy) {
     return this.client.request(
-      `${this.basePath}/database/tables/${tableName}/policies`,
+      `${this.basePath}/tables/${tableName}/policies`,
       {
         method: "POST",
         body: policy
@@ -190,14 +190,14 @@ var DatabaseClient = class {
    * List RLS policies for a table
    */
   async listPolicies(tableName) {
-    return this.client.request(`${this.basePath}/database/tables/${tableName}/policies`);
+    return this.client.request(`${this.basePath}/tables/${tableName}/policies`);
   }
   /**
    * Delete an RLS policy
    */
   async deletePolicy(tableName, policyName) {
     return this.client.request(
-      `${this.basePath}/database/tables/${tableName}/policies/${policyName}`,
+      `${this.basePath}/tables/${tableName}/policies/${policyName}`,
       { method: "DELETE" }
     );
   }
@@ -277,7 +277,7 @@ var AuthClient = class {
     this.session = null;
   }
   get basePath() {
-    return `/api/project/${this.client.getProjectSlug()}/auth`;
+    return `/api/projects/${this.client.getProjectSlug()}/auth`;
   }
   /**
    * Get the current session
@@ -292,7 +292,8 @@ var AuthClient = class {
     return this.session?.user || null;
   }
   /**
-   * Sign up with email and password
+   * Sign up with email and password - Step 1: Request OTP
+   * This sends an OTP to the user's email for verification
    */
   async signUp(credentials) {
     const result = await this.client.request(`${this.basePath}/signup`, {
@@ -301,6 +302,20 @@ var AuthClient = class {
         email: credentials.email,
         password: credentials.password,
         user_metadata: credentials.metadata
+      }
+    });
+    return result;
+  }
+  /**
+   * Verify signup with OTP - Step 2: Complete registration
+   * This verifies the OTP and creates the user account
+   */
+  async verifySignUp(options) {
+    const result = await this.client.request(`${this.basePath}/verify-signup`, {
+      method: "POST",
+      body: {
+        email: options.email,
+        code: options.code
       }
     });
     if (result.data) {
@@ -363,7 +378,7 @@ var AuthClient = class {
    * Send password recovery email
    */
   async resetPasswordForEmail(options) {
-    return this.client.request(`${this.basePath}/recover`, {
+    return this.client.request(`${this.basePath}/recover-password`, {
       method: "POST",
       body: { email: options.email }
     });
@@ -449,7 +464,7 @@ var LoggingClient = class {
     this.client = client;
   }
   get basePath() {
-    return `/api/project/${this.client.getProjectSlug()}/logs`;
+    return `/api/projects/${this.client.getProjectSlug()}/logs`;
   }
   /**
    * Get all logs
@@ -522,7 +537,7 @@ var EnvironmentClient = class {
     this.client = client;
   }
   get basePath() {
-    return `/api/project/${this.client.getProjectSlug()}/environment-variables`;
+    return `/api/projects/${this.client.getProjectSlug()}/environment-variables`;
   }
   /**
    * List all environment variables
