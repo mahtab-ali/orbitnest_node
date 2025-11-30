@@ -114,6 +114,10 @@ declare class HttpClient {
 declare class DatabaseClient {
     private client;
     constructor(client: HttpClient);
+    /**
+     * Get the base path for client database operations
+     * Uses /api/project/:slug/database/* for client SDK authentication (API keys)
+     */
     private get basePath();
     /**
      * Execute a raw SQL query
@@ -136,33 +140,39 @@ declare class DatabaseClient {
     }>>;
     /**
      * Insert a row into a table
+     * Note: Requires service_role_key for authentication
      */
     insert<T = Record<string, unknown>>(tableName: string, data: Record<string, unknown>): Promise<ApiResult<T>>;
     /**
      * Update a row by ID
+     * Note: Requires service_role_key for authentication
      */
     update<T = Record<string, unknown>>(tableName: string, rowId: string | number, data: Record<string, unknown>): Promise<ApiResult<T>>;
     /**
      * Delete a row by ID
+     * Note: Requires service_role_key for authentication
      */
     delete(tableName: string, rowId: string | number): Promise<ApiResult<{
         success: boolean;
     }>>;
     /**
      * Bulk insert rows
+     * Note: Requires service_role_key for authentication
      */
     bulkInsert<T = Record<string, unknown>>(tableName: string, rows: Record<string, unknown>[]): Promise<ApiResult<T[]>>;
     /**
      * Bulk update rows
+     * Note: Requires service_role_key for authentication
      */
     bulkUpdate<T = Record<string, unknown>>(tableName: string, updates: Array<{
-        id: string | number;
+        where: Record<string, unknown>;
         data: Record<string, unknown>;
     }>): Promise<ApiResult<T[]>>;
     /**
      * Bulk delete rows
+     * Note: Requires service_role_key for authentication
      */
-    bulkDelete(tableName: string, ids: Array<string | number>): Promise<ApiResult<{
+    bulkDelete(tableName: string, conditions: Record<string, unknown>[]): Promise<ApiResult<{
         deleted: number;
     }>>;
     /**

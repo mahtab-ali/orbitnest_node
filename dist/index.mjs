@@ -61,8 +61,12 @@ var DatabaseClient = class {
   constructor(client) {
     this.client = client;
   }
+  /**
+   * Get the base path for client database operations
+   * Uses /api/project/:slug/database/* for client SDK authentication (API keys)
+   */
   get basePath() {
-    return `/api/projects/${this.client.getProjectSlug()}/database`;
+    return `/api/project/${this.client.getProjectSlug()}/database`;
   }
   /**
    * Execute a raw SQL query
@@ -70,7 +74,7 @@ var DatabaseClient = class {
   async query(sql, params) {
     return this.client.request(`${this.basePath}/sql`, {
       method: "POST",
-      body: { query: sql, params }
+      body: { sql, params }
     });
   }
   /**
@@ -101,6 +105,7 @@ var DatabaseClient = class {
   }
   /**
    * Insert a row into a table
+   * Note: Requires service_role_key for authentication
    */
   async insert(tableName, data) {
     return this.client.request(`${this.basePath}/tables/${tableName}/rows`, {
@@ -110,6 +115,7 @@ var DatabaseClient = class {
   }
   /**
    * Update a row by ID
+   * Note: Requires service_role_key for authentication
    */
   async update(tableName, rowId, data) {
     return this.client.request(`${this.basePath}/tables/${tableName}/rows/${rowId}`, {
@@ -119,6 +125,7 @@ var DatabaseClient = class {
   }
   /**
    * Delete a row by ID
+   * Note: Requires service_role_key for authentication
    */
   async delete(tableName, rowId) {
     return this.client.request(
@@ -128,31 +135,34 @@ var DatabaseClient = class {
   }
   /**
    * Bulk insert rows
+   * Note: Requires service_role_key for authentication
    */
   async bulkInsert(tableName, rows) {
-    return this.client.request(`${this.basePath}/tables/${tableName}/bulk-insert`, {
+    return this.client.request(`${this.basePath}/tables/${tableName}/rows/bulk`, {
       method: "POST",
-      body: { rows }
+      body: rows
     });
   }
   /**
    * Bulk update rows
+   * Note: Requires service_role_key for authentication
    */
   async bulkUpdate(tableName, updates) {
-    return this.client.request(`${this.basePath}/tables/${tableName}/bulk-update`, {
+    return this.client.request(`${this.basePath}/tables/${tableName}/rows/bulk`, {
       method: "PUT",
-      body: { updates }
+      body: updates
     });
   }
   /**
    * Bulk delete rows
+   * Note: Requires service_role_key for authentication
    */
-  async bulkDelete(tableName, ids) {
+  async bulkDelete(tableName, conditions) {
     return this.client.request(
-      `${this.basePath}/tables/${tableName}/bulk-delete`,
+      `${this.basePath}/tables/${tableName}/rows/bulk`,
       {
         method: "DELETE",
-        body: { ids }
+        body: conditions
       }
     );
   }
