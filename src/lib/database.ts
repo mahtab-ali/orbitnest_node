@@ -82,16 +82,31 @@ export class DatabaseClient {
 
   /**
    * Insert a row into a table
-   * Note: Requires service_role_key for authentication
+   * Returns the inserted row data
    */
   async insert<T = Record<string, unknown>>(
     tableName: string,
     data: Record<string, unknown>
   ): Promise<ApiResult<T>> {
-    return this.client.request<T>(`${this.basePath}/tables/${tableName}/rows`, {
+    const result = await this.client.request<{
+      success: boolean;
+      data: T[];
+      rows_affected: number;
+      message: string;
+    }>(`${this.basePath}/tables/${tableName}/rows`, {
       method: 'POST',
       body: data,
     });
+
+    if (result.error) {
+      return result as ApiResult<T>;
+    }
+
+    // Return the first inserted row
+    return {
+      data: result.data.data?.[0] || (result.data as unknown as T),
+      error: null,
+    };
   }
 
   /**
@@ -103,10 +118,23 @@ export class DatabaseClient {
     rowId: string | number,
     data: Record<string, unknown>
   ): Promise<ApiResult<T>> {
-    return this.client.request<T>(`${this.basePath}/tables/${tableName}/rows/${rowId}`, {
+    const result = await this.client.request<{
+      success: boolean;
+      data: T;
+      message: string;
+    }>(`${this.basePath}/tables/${tableName}/rows/${rowId}`, {
       method: 'PUT',
       body: data,
     });
+
+    if (result.error) {
+      return result as ApiResult<T>;
+    }
+
+    return {
+      data: result.data.data || (result.data as unknown as T),
+      error: null,
+    };
   }
 
   /**
