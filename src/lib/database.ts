@@ -10,8 +10,12 @@ import type {
 export class DatabaseClient {
   constructor(private client: HttpClient) {}
 
+  /**
+   * Get the base path for client database operations
+   * Uses /api/project/:slug/database/* for client SDK authentication (API keys)
+   */
   private get basePath(): string {
-    return `/api/projects/${this.client.getProjectSlug()}/database`;
+    return `/api/project/${this.client.getProjectSlug()}/database`;
   }
 
   /**
@@ -20,7 +24,7 @@ export class DatabaseClient {
   async query<T = Record<string, unknown>>(sql: string, params?: unknown[]): Promise<ApiResult<QueryResult<T>>> {
     return this.client.request<QueryResult<T>>(`${this.basePath}/sql`, {
       method: 'POST',
-      body: { query: sql, params },
+      body: { sql, params },
     });
   }
 
@@ -59,6 +63,7 @@ export class DatabaseClient {
 
   /**
    * Insert a row into a table
+   * Note: Requires service_role_key for authentication
    */
   async insert<T = Record<string, unknown>>(
     tableName: string,
@@ -72,6 +77,7 @@ export class DatabaseClient {
 
   /**
    * Update a row by ID
+   * Note: Requires service_role_key for authentication
    */
   async update<T = Record<string, unknown>>(
     tableName: string,
@@ -86,6 +92,7 @@ export class DatabaseClient {
 
   /**
    * Delete a row by ID
+   * Note: Requires service_role_key for authentication
    */
   async delete(tableName: string, rowId: string | number): Promise<ApiResult<{ success: boolean }>> {
     return this.client.request<{ success: boolean }>(
@@ -96,42 +103,45 @@ export class DatabaseClient {
 
   /**
    * Bulk insert rows
+   * Note: Requires service_role_key for authentication
    */
   async bulkInsert<T = Record<string, unknown>>(
     tableName: string,
     rows: Record<string, unknown>[]
   ): Promise<ApiResult<T[]>> {
-    return this.client.request<T[]>(`${this.basePath}/tables/${tableName}/bulk-insert`, {
+    return this.client.request<T[]>(`${this.basePath}/tables/${tableName}/rows/bulk`, {
       method: 'POST',
-      body: { rows },
+      body: rows,
     });
   }
 
   /**
    * Bulk update rows
+   * Note: Requires service_role_key for authentication
    */
   async bulkUpdate<T = Record<string, unknown>>(
     tableName: string,
-    updates: Array<{ id: string | number; data: Record<string, unknown> }>
+    updates: Array<{ where: Record<string, unknown>; data: Record<string, unknown> }>
   ): Promise<ApiResult<T[]>> {
-    return this.client.request<T[]>(`${this.basePath}/tables/${tableName}/bulk-update`, {
+    return this.client.request<T[]>(`${this.basePath}/tables/${tableName}/rows/bulk`, {
       method: 'PUT',
-      body: { updates },
+      body: updates,
     });
   }
 
   /**
    * Bulk delete rows
+   * Note: Requires service_role_key for authentication
    */
   async bulkDelete(
     tableName: string,
-    ids: Array<string | number>
+    conditions: Record<string, unknown>[]
   ): Promise<ApiResult<{ deleted: number }>> {
     return this.client.request<{ deleted: number }>(
-      `${this.basePath}/tables/${tableName}/bulk-delete`,
+      `${this.basePath}/tables/${tableName}/rows/bulk`,
       {
         method: 'DELETE',
-        body: { ids },
+        body: conditions,
       }
     );
   }
