@@ -106,10 +106,21 @@ var DatabaseClient = class {
    * Execute a raw SQL query
    */
   async query(sql, params) {
-    return this.client.request(`${this.basePath}/sql`, {
+    const result = await this.client.request(`${this.basePath}/sql`, {
       method: "POST",
       body: { sql, params }
     });
+    if (result.error) {
+      return result;
+    }
+    return {
+      data: {
+        rows: result.data.data || [],
+        rowCount: result.data.rows_affected || 0,
+        fields: result.data.columns?.map((col) => ({ name: col.name, dataType: col.type }))
+      },
+      error: null
+    };
   }
   /**
    * Get all tables in the database
@@ -139,23 +150,37 @@ var DatabaseClient = class {
   }
   /**
    * Insert a row into a table
-   * Note: Requires service_role_key for authentication
+   * Returns the inserted row data
    */
   async insert(tableName, data) {
-    return this.client.request(`${this.basePath}/tables/${tableName}/rows`, {
+    const result = await this.client.request(`${this.basePath}/tables/${tableName}/rows`, {
       method: "POST",
       body: data
     });
+    if (result.error) {
+      return result;
+    }
+    return {
+      data: result.data.data?.[0] || result.data,
+      error: null
+    };
   }
   /**
    * Update a row by ID
    * Note: Requires service_role_key for authentication
    */
   async update(tableName, rowId, data) {
-    return this.client.request(`${this.basePath}/tables/${tableName}/rows/${rowId}`, {
+    const result = await this.client.request(`${this.basePath}/tables/${tableName}/rows/${rowId}`, {
       method: "PUT",
       body: data
     });
+    if (result.error) {
+      return result;
+    }
+    return {
+      data: result.data.data || result.data,
+      error: null
+    };
   }
   /**
    * Delete a row by ID

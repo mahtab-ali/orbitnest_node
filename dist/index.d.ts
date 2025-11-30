@@ -140,7 +140,7 @@ declare class DatabaseClient {
     }>>;
     /**
      * Insert a row into a table
-     * Note: Requires service_role_key for authentication
+     * Returns the inserted row data
      */
     insert<T = Record<string, unknown>>(tableName: string, data: Record<string, unknown>): Promise<ApiResult<T>>;
     /**
