@@ -22,10 +22,29 @@ export class DatabaseClient {
    * Execute a raw SQL query
    */
   async query<T = Record<string, unknown>>(sql: string, params?: unknown[]): Promise<ApiResult<QueryResult<T>>> {
-    return this.client.request<QueryResult<T>>(`${this.basePath}/sql`, {
+    const result = await this.client.request<{
+      success: boolean;
+      data: T[];
+      rows_affected: number;
+      columns?: Array<{ name: string; type: string }>;
+    }>(`${this.basePath}/sql`, {
       method: 'POST',
       body: { sql, params },
     });
+
+    if (result.error) {
+      return result as ApiResult<QueryResult<T>>;
+    }
+
+    // Transform API response to QueryResult format
+    return {
+      data: {
+        rows: result.data.data || [],
+        rowCount: result.data.rows_affected || 0,
+        fields: result.data.columns?.map(col => ({ name: col.name, dataType: col.type })),
+      },
+      error: null,
+    };
   }
 
   /**
