@@ -1034,14 +1034,16 @@ export function useDatabase<T = any>(tableName: string) {
   };
 
   // Custom SQL query
-  const query = async (sql: string, params: any[] = []) => {
+  // Note: Backend does not support parameterized queries
+  // Embed values directly in SQL (sanitize user input!)
+  const query = async (sql: string) => {
     const res = await fetch(`${config.projectUrl}/database/sql`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${getToken()}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ sql, params })
+      body: JSON.stringify({ sql })
     });
 
     return await res.json();

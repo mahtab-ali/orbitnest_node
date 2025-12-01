@@ -20,6 +20,7 @@ export class DatabaseClient {
 
   /**
    * Execute a raw SQL query
+   * Note: Backend does not support parameterized queries - params are ignored
    */
   async query<T = Record<string, unknown>>(sql: string, params?: unknown[]): Promise<ApiResult<QueryResult<T>>> {
     const result = await this.client.request<{
@@ -29,7 +30,7 @@ export class DatabaseClient {
       columns?: Array<{ name: string; type: string }>;
     }>(`${this.basePath}/sql`, {
       method: 'POST',
-      body: { sql, params },
+      body: { sql },  // Backend only accepts sql, not params
     });
 
     if (result.error) {

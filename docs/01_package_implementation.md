@@ -51,7 +51,7 @@ Full database operations with fluent query builder.
 
 ```typescript
 class DatabaseClient {
-  // Raw SQL
+  // Raw SQL (params parameter is ignored - backend doesn't support parameterized queries)
   query(sql: string, params?: unknown[]): Promise<ApiResult<QueryResult>>
 
   // Table operations

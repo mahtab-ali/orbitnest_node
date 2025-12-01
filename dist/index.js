@@ -104,11 +104,13 @@ var DatabaseClient = class {
   }
   /**
    * Execute a raw SQL query
+   * Note: Backend does not support parameterized queries - params are ignored
    */
   async query(sql, params) {
     const result = await this.client.request(`${this.basePath}/sql`, {
       method: "POST",
-      body: { sql, params }
+      body: { sql }
+      // Backend only accepts sql, not params
     });
     if (result.error) {
       return result;

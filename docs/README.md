@@ -24,8 +24,12 @@ const client = createClient({
 
 ```typescript
 // Raw SQL query
-const { data, error } = await client.db.query('SELECT * FROM users WHERE id = $1', [1]);
+// Note: Backend does not support parameterized queries ($1, $2, etc.)
+// Embed values directly in the SQL string (be careful with SQL injection!)
+const userId = '123e4567-e89b-12d3-a456-426614174000';
+const { data, error } = await client.db.query(`SELECT * FROM users WHERE id = '${userId}'`);
 
+// For safer queries with user input, use the fluent API or table operations
 // List tables
 const { data: tables } = await client.db.listTables();
 

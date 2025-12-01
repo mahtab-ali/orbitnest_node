@@ -121,6 +121,7 @@ declare class DatabaseClient {
     private get basePath();
     /**
      * Execute a raw SQL query
+     * Note: Backend does not support parameterized queries - params are ignored
      */
     query<T = Record<string, unknown>>(sql: string, params?: unknown[]): Promise<ApiResult<QueryResult<T>>>;
     /**
