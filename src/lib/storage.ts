@@ -42,7 +42,7 @@ export class StorageBucket {
   ) {}
 
   private get basePath(): string {
-    return `/api/projects/${this.client.getProjectSlug()}/storage/${this.bucket}`;
+    return `/api/project/${this.client.getProjectSlug()}/storage/${this.bucket}`;
   }
 
   /**
@@ -175,7 +175,7 @@ export class StorageBucket {
   getPublicUrl(path: string): { data: { publicUrl: string } } {
     const baseUrl = (this.client as any).baseUrl || 'https://api.orbitnest.io';
     const projectSlug = this.client.getProjectSlug();
-    const publicUrl = `${baseUrl}/api/projects/${projectSlug}/storage/${this.bucket}/${path}`;
+    const publicUrl = `${baseUrl}/api/project/${projectSlug}/storage/${this.bucket}/${path}`;
 
     return {
       data: { publicUrl },

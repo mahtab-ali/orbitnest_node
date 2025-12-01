@@ -686,7 +686,7 @@ var StorageBucket = class {
     this.bucket = bucket;
   }
   get basePath() {
-    return `/api/projects/${this.client.getProjectSlug()}/storage/${this.bucket}`;
+    return `/api/project/${this.client.getProjectSlug()}/storage/${this.bucket}`;
   }
   /**
    * Upload a file to the bucket
@@ -795,7 +795,7 @@ var StorageBucket = class {
   getPublicUrl(path) {
     const baseUrl = this.client.baseUrl || "https://api.orbitnest.io";
     const projectSlug = this.client.getProjectSlug();
-    const publicUrl = `${baseUrl}/api/projects/${projectSlug}/storage/${this.bucket}/${path}`;
+    const publicUrl = `${baseUrl}/api/project/${projectSlug}/storage/${this.bucket}/${path}`;
     return {
       data: { publicUrl }
     };
