@@ -674,7 +674,9 @@ var StorageBucket = class {
     if (options?.upsert) {
       formData.append("upsert", "true");
     }
-    const url = `${this.basePath}/upload`;
+    const baseUrl = this.client.baseUrl || "https://api.orbitnest.io";
+    const url = `${baseUrl}${this.basePath}/upload`;
+    console.log("[StorageBucket] Upload request:", { url, path, bucketName: this.bucket });
     try {
       const response = await fetch(url, {
         method: "POST",
@@ -683,7 +685,25 @@ var StorageBucket = class {
         },
         body: formData
       });
-      const data = await response.json();
+      let data;
+      try {
+        data = await response.json();
+      } catch (jsonErr) {
+        const responseText = await response.text();
+        console.error("[StorageBucket] Failed to parse response as JSON:", {
+          status: response.status,
+          statusText: response.statusText,
+          responsePreview: responseText.substring(0, 200)
+        });
+        return {
+          data: null,
+          error: {
+            message: `Upload failed: ${response.status} ${response.statusText}`,
+            status: response.status,
+            code: "INVALID_RESPONSE"
+          }
+        };
+      }
       if (!response.ok) {
         return {
           data: null,
@@ -695,6 +715,7 @@ var StorageBucket = class {
       }
       return { data: data.data, error: null };
     } catch (err) {
+      console.error("[StorageBucket] Upload error:", err);
       return {
         data: null,
         error: {
@@ -708,7 +729,8 @@ var StorageBucket = class {
    * Download a file from the bucket
    */
   async download(path) {
-    const url = `${this.basePath}/${path}`;
+    const baseUrl = this.client.baseUrl || "https://api.orbitnest.io";
+    const url = `${baseUrl}${this.basePath}/${path}`;
     try {
       const response = await fetch(url, {
         headers: {
