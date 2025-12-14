@@ -1,3 +1,12 @@
 node_modules
 *.log
 .DS_Store
+# AI Assistant files and directories
+.claude/
+.copilot/
+.cursor/
+.aider/
+.cursorrules
+.clinerules
+*.ai.md
+.ai/

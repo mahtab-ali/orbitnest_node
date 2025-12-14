@@ -198,7 +198,8 @@ export class StorageBucket {
   getPublicUrl(path: string): { data: { publicUrl: string } } {
     const baseUrl = (this.client as any).baseUrl || 'https://api.orbitnest.io';
     const projectSlug = this.client.getProjectSlug();
-    const publicUrl = `${baseUrl}/api/project/${projectSlug}/storage/${this.bucket}/${path}`;
+    // Use public endpoint that doesn't require authentication
+    const publicUrl = `${baseUrl}/api/public/${projectSlug}/storage/${this.bucket}/${path}`;
 
     return {
       data: { publicUrl },
